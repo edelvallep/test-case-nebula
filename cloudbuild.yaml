@@ -1,0 +1,7 @@
+steps:
+- name: 'gcr.io/cloud-builders/gradle'
+  args: ['build -Pgit.root=/workspace/$REPO_NAME']
+  dir: '$REPO_NAME'
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ['cp', '$REPO_NAME/build/libs/*.jar', 'gs://seri-deployments/Tools']
+logsBucket: 'gs://seri-deployments/cloud-build-logs'

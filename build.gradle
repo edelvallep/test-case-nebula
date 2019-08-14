@@ -1,0 +1,85 @@
+plugins {
+  id 'com.github.johnrengelman.shadow' version '2.0.4'
+  id 'java'
+  id 'eclipse'
+  id 'nebula.release' version '11.1.0'
+}
+sourceCompatibility = 1.8
+
+// START: Update these values to project requirements
+def appName = 'mytest'
+//remove this line def appVersion
+//def appVersion = '1.0.0'
+def mainClass = 'com.serimmune.mytest.MyData'
+def makeFatJar = 'true'
+ext.propertyFile = 'mytest.properties'
+//add this line
+apply plugin: 'nebula.release'
+
+dependencies {
+  compile group: 'com.google.cloud', name: 'google-cloud-logging-logback', version: '0.79.0-alpha'
+  testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+if (JavaVersion.current().isJava8Compatible()) {
+    tasks.withType(Javadoc) {
+        // disable the crazy super-strict doclint tool in Java 8
+        //noinspection SpellCheckingInspection
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+}
+
+// END: Update these values to project requirements
+// *** The rest of the entries below this should be the same for all jar file builds. ********** //
+
+repositories {
+  jcenter()
+  flatDir {
+    dirs 'lib'
+  }
+}
+
+compileJava {
+  options.compilerArgs += [ '-proc:none' ]
+}
+
+compileTestJava {
+  options.compilerArgs += [ '-proc:none' ]
+}
+
+// Used to add/update buildDateTime value; all non-java files must be in src/main/resources
+task updateBuildDateTime {
+  if (project.hasProperty('propertyFile') && propertyFile != null) {
+    doLast{
+      File propsFile = file "build/resources/main/" + propertyFile
+      Properties props = new Properties()
+      props.load(propsFile.newDataInputStream())
+      props.setProperty('buildDateTime', new Date().format('yyyyMMddHHmm'))
+      props.store(propsFile.newWriter(), null)
+    }
+  }
+}
+processResources.finalizedBy(updateBuildDateTime)
+
+shadowJar {
+  baseName = appName
+  //add this line to get version using nebula.release
+  version = version.split("-")[0]
+  classifier = null
+  manifest {
+    attributes 'Main-Class': mainClass
+  }
+}
+
+jar {
+  baseName = appName + '-api'
+  //add this line to get version using nebula.release
+  version = version.split("-")[0]
+}
+
+task finalize {
+  if (makeFatJar.toBoolean()) {
+    dependsOn shadowJar
+  }
+}
+build.finalizedBy(finalize)

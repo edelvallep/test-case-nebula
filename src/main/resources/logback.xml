@@ -1,0 +1,29 @@
+<configuration>
+  <!-- START: Update these values -->
+  <contextName>mytest</contextName>
+  <property scope="context" name="project_id" value="seri-vessel" />
+  <!-- END:   Update these values -->
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%date{yyyyMMdd HH:mm:ss}|%level|%thread|%file|%line|%method|%message%n</pattern>
+    </encoder>
+  </appender>
+  
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+     <file>${CONTEXT_NAME}.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${CONTEXT_NAME}.%d{yyyyMMdd}-%i.log</fileNamePattern>
+      <maxFileSize>100MB</maxFileSize>    
+    </rollingPolicy>
+    <encoder>
+      <pattern>%date{yyyyMMdd HH:mm:ss}|%level|%thread|%file|%line|%method|%message%n</pattern>
+    </encoder>
+  </appender>
+  
+
+  <root level="info">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILE" />
+  </root>
+</configuration>
